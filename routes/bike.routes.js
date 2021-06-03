@@ -5,7 +5,8 @@ const checkToken = require("../middleware")
 
 router.get('/', async (req, res) => {
     await Bike.find({})
-        .populate("vendor")
+    .select("-description")
+        .populate("vendor", "firstName")
         .exec((err, bikes) => {
             if (err) {
                 return res.status(400).send(err);
