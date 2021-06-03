@@ -9,11 +9,10 @@ const User = require("../models/user.js")
 
 router.get('/', async (req, res) => {
     const users = await User.find();
-    console.log(users);
     res.json(users);
 });
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', checkToken, async (req, res) => {
     const user = await User.findById(req.params.id);
     res.json(User);
 });
@@ -21,9 +20,9 @@ router.get('/:id', async (req, res) => {
 router.post('/', async (req, res) => {
     const { profilePhotoURL, firstName, surname1, surname2 , email, password, tel, address, street, doornumber, city, postalCode, country, bikesForSell, bikesInterested } = req.body;
     
-    if(!email || !password) {
+    if(!email || !password || !firstName || !surname1) {
         return res.status(403).send({
-            succes: false,
+            success: false,
             message: "Enter all credentials."
         })
     }
@@ -32,21 +31,24 @@ router.post('/', async (req, res) => {
 
     if(foundUser) {
         return res.status(403).send({
-            succes: false,
+            success: false,
             message: "This email is already in use."
         })
     }
 
     if (password.length < 6) {
         return res.status(403).send({
-            succes: false,
+            success: false,
             message: "Password too short (min. 6)."
         })
     }
     
     const user = new User({profilePhotoURL, firstName, surname1, surname2 , email, password, tel, address, street, doornumber, city, postalCode, country, bikesForSell, bikesInterested});
     await user.save();
-    res.json({status: 'Usuario creado'});
+    return res.send({
+        success: true,
+        message: 'Usuario creado'
+    });
 })
 
 router.put('/:id', checkToken, async (req, res) => {
@@ -67,7 +69,7 @@ router.post ("/login", async (req, res) => {
 
     if(!email || !password) {
         return res.status(403).send({
-            succes: false,
+            success: false,
             message: "Enter all credentials."
         })
     }
@@ -76,7 +78,7 @@ router.post ("/login", async (req, res) => {
 
     if(!foundUser) {
         return res.status(404).send({
-            succes: false,
+            success: false,
             message: "Wrong credentials (email)."
         })
     }
@@ -85,7 +87,7 @@ router.post ("/login", async (req, res) => {
 
     if(!match) {
         return res.status(403).send({
-            succes: false,
+            success: false,
             message: "Wrong credentials (pass)."
         })
     }
